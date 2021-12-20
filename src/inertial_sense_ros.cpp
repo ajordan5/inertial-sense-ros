@@ -505,6 +505,9 @@ void InertialSenseROS::INS2_callback(const ins_2_t * const msg)
 
   if (LTCF == NED)
   {
+    ROS_DEBUG("LTCF == NED qn2b[%f,%f,%f,%f]",
+      msg->qn2b[0], msg->qn2b[1], msg->qn2b[2], msg->qn2b[3]);
+
     odom_msg.pose.pose.orientation.w = msg->qn2b[0];
     odom_msg.pose.pose.orientation.x = msg->qn2b[1];
     odom_msg.pose.pose.orientation.y = msg->qn2b[2];
@@ -526,6 +529,12 @@ void InertialSenseROS::INS2_callback(const ins_2_t * const msg)
     ixEuler eul = {M_PI, 0, 0.5*M_PI};
     euler2quat(eul, q_enu2ned);
     mul_Quat_Quat(q_enu2b, msg->qn2b, q_enu2ned);
+
+    ROS_DEBUG("LTCF == ENU qn2b[%f,%f,%f,%f] eul[%f,%f,%f] q_enu2ned[%f,%f,%f,%f] q_enu2b[%f,%f,%f,%f]",
+      msg->qn2b[0], msg->qn2b[1], msg->qn2b[2], msg->qn2b[3],
+      eul[0], eul[1], eul[2],
+      q_enu2ned[0], q_enu2ned[1], q_enu2ned[2], q_enu2ned[3],
+      q_enu2b[0], q_enu2b[1], q_enu2b[2], q_enu2b[3]);
 
     odom_msg.pose.pose.orientation.w = q_enu2b[0];
     odom_msg.pose.pose.orientation.x = q_enu2b[1];
