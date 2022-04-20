@@ -50,15 +50,15 @@ void InertialSenseROS::configure_data_streams()
     nh_private_.param<bool>("stream_odom_ins_ecef", odom_ins_ecef_.enabled, false);
     nh_private_.param<bool>("stream_covariance_data", covariance_enabled_, false);
     nh_private_.param<bool>("stream_INL2_states", INL2_states_.enabled, false);
-    nh_private_.param<bool>("stream_IMU", IMU_.enabled, true);
     nh_private_.param<bool>("stream_GPS", GPS_.enabled, true);
     nh_private_.param<bool>("stream_GPS_raw", GPS_obs_.enabled, false);
     nh_private_.param<bool>("stream_GPS_raw", GPS_eph_.enabled, false);
     nh_private_.param<bool>("stream_GPS_info", GPS_info_.enabled, false);
     nh_private_.param<bool>("stream_NavSatFix", NavSatFix_.enabled, false);
+    nh_private_.param<bool>("stream_preint_IMU", preint_IMU_.enabled, false);
+    nh_private_.param<bool>("stream_IMU", IMU_.enabled, true);
     nh_private_.param<bool>("stream_mag", mag_.enabled, false);
     nh_private_.param<bool>("stream_baro", baro_.enabled, false);
-    nh_private_.param<bool>("stream_preint_IMU", preint_IMU_.enabled, false);
     nh_private_.param<bool>("stream_diagnostics", diagnostics_.enabled, true);
     nh_private_.param<bool>("publishTf", publishTf, true);
 
