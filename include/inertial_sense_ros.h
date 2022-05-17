@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <string>
 #include <cstdlib>
-#include <yaml-cpp/yaml.h>
 
 #include "InertialSense.h"
+
 #include "ros/ros.h"
 #include "ros/timer.h"
 #include "sensor_msgs/Imu.h"
@@ -67,18 +67,12 @@ public:
     } NMEA_message_config_t;
 
     InertialSenseROS();
-    InertialSenseROS(std::string paramYAMLPath);
     void callback(p_data_t *data);
     void update();
 
-    void load_params_srv();
-    void load_params_yaml(string param_file);
-    template <typename Type>
-    bool get_node_param_yaml(YAML::Node node, const std::string key, Type &val);
-    template <typename Derived1>
-    bool get_node_vector_yaml(YAML::Node node, const std::string key, int size, Derived1 &val);
     void connect();
-    void configure_flash_parameters();
+    void set_navigation_dt_ms();
+    void configure_parameters();
     void configure_rtk();
     void connect_rtk_client(const std::string &RTK_correction_protocol, const std::string &RTK_server_IP, const int RTK_server_port);
     void start_rtk_server(const std::string &RTK_server_IP, const int RTK_server_port);
@@ -88,31 +82,32 @@ public:
     void start_log();
 
     template <typename T>
-    void get_vector_flash_config(std::string param_name, uint32_t size, T &data);
-    //void set_vector_flash_config(std::string param_name, uint32_t size, uint32_t offset);
+    void set_vector_flash_config(std::string param_name, uint32_t size, uint32_t offset);
+    template <typename T>
+    void set_flash_config(std::string param_name, uint32_t offset, T def) __attribute__((optimize(0)));
     void get_flash_config();
     void reset_device();
     void flash_config_callback(const nvm_flash_cfg_t *const msg);
     // Serial Port Configuration
-    std::string port_ = "/dev/ttyACM0";
-    int baudrate_ = 921600;
+    std::string port_;
+    int baudrate_;
     bool initialized_;
-    bool log_enabled_ = false;
-    bool covariance_enabled_ = false;
+    bool log_enabled_;
+    bool covariance_enabled_;
 
-    std::string frame_id_ = "body";
+    std::string frame_id_;
 
     // ROS Stream handling
     typedef struct
     {
-        bool enabled = false;
+        bool enabled;
         ros::Publisher pub;
         ros::Publisher pub2;
     } ros_stream_t;
 
 
     tf::TransformBroadcaster br;
-    bool publishTf_ = true;
+    bool publishTf;
     tf::Transform transform_NED;
     tf::Transform transform_ENU;
     tf::Transform transform_ECEF;
@@ -132,26 +127,8 @@ public:
     ros::Time last_obs_time_;
 
     bool rtk_connecting_ = false;
-    int RTK_connection_attempt_limit_ = 1;
-    int RTK_connection_attempt_backoff_ = 2;
     int rtk_traffic_total_byte_count_ = 0;
     int rtk_data_transmission_interruption_count_ = 0;
-    bool rtk_connectivity_watchdog_enabled_ = false;
-    float rtk_connectivity_watchdog_timer_frequency_ = 1;
-    int rtk_data_transmission_interruption_limit_ = 5;
-    std::string RTK_server_mount_ = "";
-    std::string RTK_server_username_ = "";
-    std::string RTK_server_password_ = "";
-    std::string RTK_correction_protocol_ = "RTCM3";
-    std::string RTK_server_IP_ = "127.0.0.1";
-    int RTK_server_port_ = 7777;
-    bool RTK_rover_ = false;
-    bool RTK_rover_radio_enable_ = false;
-    bool RTK_base_ = false;
-    bool dual_GNSS_ = false;
-    
-    std::string gps_type_ = "M8";
-    
     ros::Timer rtk_connectivity_watchdog_timer_;
     void start_rtk_connectivity_watchdog_timer();
     void stop_rtk_connectivity_watchdog_timer();
@@ -357,18 +334,7 @@ public:
     ros::NodeHandle nh_private_;
 
     // Connection to the uINS
-    InertialSense IS_;   
-
-    //Flash parameters
-
-    int navigation_dt_ms_ = 4;
-    float insRotation_[3] = {0, 0, 0};
-    float insOffset_[3] = {0, 0, 0};
-    float gps1AntOffset_[3] = {0, 0, 0};
-    float gps2AntOffset_[3] = {0, 0, 0};
-    double refLla_[3] = {0, 0, 0};
-    float magInclination_ = 0;
-    float magDeclination_ = 0;
-    int insDynModel_ = 8;
+    InertialSense IS_;
+    double refLla_[3] = {0};
     bool refLLA_known = false;
 };
