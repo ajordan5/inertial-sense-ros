@@ -9,30 +9,32 @@
 #include "InertialSense.h"
 
 #include "ros/ros.h"
+#include "rclcpp/rclcpp.hpp"
 #include "ros/timer.h"
-#include "sensor_msgs/Imu.h"
-#include "sensor_msgs/MagneticField.h"
-#include "sensor_msgs/FluidPressure.h"
-#include "sensor_msgs/JointState.h"
-#include "inertial_sense_ros/GPS.h"
-#include "inertial_sense_ros/GPSInfo.h"
-#include "inertial_sense_ros/PreIntIMU.h"
-#include "inertial_sense_ros/FirmwareUpdate.h"
-#include "inertial_sense_ros/refLLAUpdate.h"
-#include "inertial_sense_ros/RTKRel.h"
-#include "inertial_sense_ros/RTKInfo.h"
-#include "inertial_sense_ros/GNSSEphemeris.h"
-#include "inertial_sense_ros/GlonassEphemeris.h"
-#include "inertial_sense_ros/GNSSObservation.h"
-#include "inertial_sense_ros/GNSSObsVec.h"
-#include "inertial_sense_ros/INL2States.h"
-#include "nav_msgs/Odometry.h"
-#include "std_srvs/Trigger.h"
-#include "std_msgs/Header.h"
-#include "geometry_msgs/Vector3Stamped.h"
-#include "geometry_msgs/PoseWithCovarianceStamped.h"
-#include "diagnostic_msgs/DiagnosticArray.h"
-#include <tf/transform_broadcaster.h>
+#include "sensor_msgs/msg/imu.h"
+#include "sensor_msgs/msg/magnetic_field.h"
+#include "sensor_msgs/msg/fluid_pressure.h"
+#include "sensor_msgs/msg/joint_state.h"
+#include "inertial_sense_ros/msg/GPS.h"
+#include "inertial_sense_ros/msg/GPSInfo.h"
+#include "inertial_sense_ros/msg/PreIntIMU.h"
+#include "inertial_sense_ros/msg/FirmwareUpdate.h"
+#include "inertial_sense_ros/msg/refLLAUpdate.h"
+#include "inertial_sense_ros/msg/RTKRel.h"
+#include "inertial_sense_ros/msg/RTKInfo.h"
+#include "inertial_sense_ros/msg/GNSSEphemeris.h"
+#include "inertial_sense_ros/msg/GlonassEphemeris.h"
+#include "inertial_sense_ros/msg/GNSSObservation.h"
+#include "inertial_sense_ros/msg/GNSSObsVec.h"
+#include "inertial_sense_ros/msg/INL2States.h"
+#include "nav_msgs/msg/odometry.h"
+#include "std_srvs/srv/trigger.h"
+#include "std_msgs/msg/header.h"
+#include "geometry_msgs/msg/vector3_stamped.h"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.h"
+#include "diagnostic_msgs/msg/diagnostic_array.h"
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
 //#include "geometry/xform.h"
 
 # define GPS_UNIX_OFFSET 315964800 // GPS time started on 6/1/1980 while UNIX time started 1/1/1970 this is the difference between those in seconds
@@ -48,7 +50,7 @@
     })
 
 
-class InertialSenseROS //: SerialListener
+class InertialSenseROS  : public rclcpp::Node//: SerialListener
 {
 public:
   typedef enum
@@ -90,18 +92,11 @@ public:
   typedef struct
   {
     bool enabled;
-    ros::Publisher pub;
-    ros::Publisher pub2;
+    rclcpp::Publisher pub;
+    rclcpp::Publisher pub2;
   } ros_stream_t;
 
-  ros_stream_t INS_;
-  void INS1_callback(const ins_1_t* const msg);
-  void INS2_callback(const ins_2_t* const msg);
-//  void INS_variance_callback(const inl2_variance_t* const msg);
-
-  ros_stream_t INL2_states_;
-  void INL2_states_callback(const inl2_states_t* const msg);
-  tf::TransformBroadcaster br;
+  std::unique_ptr<tf2_ros::TransformBroadcaster> br;
   bool publishTf;
   tf::Transform transform;
   int LTCF;
@@ -114,64 +109,27 @@ public:
   ros_stream_t IMU_;
   void IMU_callback(const dual_imu_t* const msg);
 
-  ros_stream_t GPS_;
-  ros_stream_t GPS_obs_;
-  ros_stream_t GPS_eph_;
-  void GPS_pos_callback(const gps_pos_t* const msg);
-  void GPS_vel_callback(const gps_vel_t* const msg);
-  void GPS_raw_callback(const gps_raw_t* const msg);
-  void GPS_obs_callback(const obsd_t * const msg, int nObs);
-  void GPS_eph_callback(const eph_t* const msg);
-  void GPS_geph_callback(const geph_t* const msg);
-  void GPS_obs_bundle_timer_callback(const ros::TimerEvent& e);
-  inertial_sense_ros::GNSSObsVec obs_Vec_;
-  ros::Timer obs_bundle_timer_;
-  ros::Time last_obs_time_;
-
-  ros_stream_t GPS_info_;
-  void GPS_info_callback(const gps_sat_t* const msg);
-
-  ros_stream_t mag_;
-  void mag_callback(const magnetometer_t* const msg);
-
   ros_stream_t baro_;
   void baro_callback(const barometer_t* const msg);
 
   ros_stream_t dt_vel_;
   void preint_IMU_callback(const preintegrated_imu_t * const msg);
-  
-  ros::Publisher strobe_pub_;
-  void strobe_in_time_callback(const strobe_in_time_t * const msg);
 
   ros_stream_t diagnostics_;
   void diagnostics_callback(const ros::TimerEvent& event);
-  ros::Timer diagnostics_timer_;
+  rclcpp::TimerBase diagnostics_timer_;
   float diagnostic_ar_ratio_, diagnostic_differential_age_, diagnostic_heading_base_to_rover_;
 
-  ros::ServiceServer mag_cal_srv_;
-  ros::ServiceServer multi_mag_cal_srv_;
-  ros::ServiceServer firmware_update_srv_;
-  ros::ServiceServer refLLA_set_current_srv_;
-  ros::ServiceServer refLLA_set_value_srv_;
-  bool set_current_position_as_refLLA(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response & res);
-  bool set_refLLA_to_value(inertial_sense_ros::refLLAUpdate::Request &req, inertial_sense_ros::refLLAUpdate::Response &res);
-  bool perform_mag_cal_srv_callback(std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
-  bool perform_multi_mag_cal_srv_callback(std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
+  // rclcpp::Service mag_cal_srv_;
+  // rclcpp::Service multi_mag_cal_srv_;
+  rclcpp::Service<inertial_sense_ros::srv::FirmwareUpdate> firmware_update_srv_;
+  // rclcpp::Service<inertial_sense_ros::srv::refLLAUpdate>  refLLA_set_current_srv_;
+  // rclcpp::Service<inertial_sense_ros::srv::refLLAUpdate>  refLLA_set_value_srv_;
+  // bool set_current_position_as_refLLA(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response & res);
+  // bool set_refLLA_to_value(inertial_sense_ros::refLLAUpdate::Request &req, inertial_sense_ros::refLLAUpdate::Response &res);
+  // bool perform_mag_cal_srv_callback(std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
+  // bool perform_multi_mag_cal_srv_callback(std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
   bool update_firmware_srv_callback(inertial_sense_ros::FirmwareUpdate::Request & req, inertial_sense_ros::FirmwareUpdate::Response & res);
-
-  void publishGPS();
-
-  typedef enum
-  {
-    RTK_NONE,
-    RTK_ROVER,
-    RTK_BASE,
-    DUAL_GNSS
-  } rtk_state_t;
-  rtk_state_t RTK_state_ = RTK_NONE;
-  ros_stream_t RTK_;
-  void RTK_Misc_callback(const gps_rtk_misc_t* const msg);
-  void RTK_Rel_callback(const gps_rtk_rel_t* const msg);
 
   
   /**
@@ -179,47 +137,37 @@ public:
    * Get current ROS time from week and tow
    * @param week Weeks since January 6th, 1980
    * @param timeOfWeek Time of week (since Sunday morning) in seconds, GMT
-   * @return equivalent ros::Time
+   * @return equivalent rclcpp::Time
    */
-  ros::Time ros_time_from_week_and_tow(const uint32_t week, const double timeOfWeek);
+  rclcpp::Time ros_time_from_week_and_tow(const uint32_t week, const double timeOfWeek);
   
   /**
    * @brief ros_time_from_start_time
    * @param time - Time since boot up in seconds - Convert to GPS time of week by adding gps.towOffset
-   * @return equivalent ros::Time
+   * @return equivalent rclcpp::Time
    */
-  ros::Time ros_time_from_start_time(const double time);
+  rclcpp::Time ros_time_from_start_time(const double time);
   
   /**
    * @brief ros_time_from_tow
    * Get equivalent ros time from tow and internal week counter
    * @param tow Time of Week (seconds)
-   * @return equivalent ros::Time
+   * @return equivalent rclcpp::Time
    */
-  ros::Time ros_time_from_tow(const double tow);
+  rclcpp::Time ros_time_from_tow(const double tow);
 
-  double tow_from_ros_time(const ros::Time& rt);
-  ros::Time ros_time_from_gtime(const uint64_t sec, double subsec);
-
-  double GPS_towOffset_ = 0; // The offset between GPS time-of-week and local time on the uINS
-                             //  If this number is 0, then we have not yet got a fix
-  uint64_t GPS_week_ = 0; // Week number to start of GPS_towOffset_ in GPS time
-  // Time sync variables
-  double INS_local_offset_ = 0.0; // Current estimate of the uINS start time in ROS time seconds
-  bool got_first_message_ = false; // Flag to capture first uINS start time guess
+  double tow_from_ros_time(const rclcpp::Time& rt);
+  rclcpp::Time ros_time_from_gtime(const uint64_t sec, double subsec);
 
   // Data to hold on to in between callbacks
   double lla_[3];
   double ecef_[3];
-  sensor_msgs::Imu imu1_msg, imu2_msg;
-  nav_msgs::Odometry odom_msg;
-  inertial_sense_ros::GPS gps_msg; 
-  geometry_msgs::Vector3Stamped gps_velEcef;
-  inertial_sense_ros::GPSInfo gps_info_msg;
-  inertial_sense_ros::INL2States inl2_states_msg;
-
-  ros::NodeHandle nh_;
-  ros::NodeHandle nh_private_;
+  sensor_msgs::msg::Imu imu1_msg, imu2_msg;
+  nav_msgs::msg::Odometry odom_msg;
+  inertial_sense_ros::msg::GPS gps_msg; 
+  geometry_msgs::msg::Vector3Stamped gps_velEcef;
+  inertial_sense_ros::msg::GPSInfo gps_info_msg;
+  inertial_sense_ros::msg::INL2States inl2_states_msg;
 
   // Connection to the uINS
   InertialSense IS_;

@@ -1,23 +1,31 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(inertial_sense_ros)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  sensor_msgs
-  geometry_msgs
-  diagnostic_msgs
-  message_generation
-  tf
-)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+# find_package(diagnostic_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+# find_package(tf2 REQUIRED)
+# find_package(tf2_ros REQUIRED)
+
 find_package(Threads)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11 -fms-extensions -Wl,--no-as-needed -DPLATFORM_IS_LINUX" )
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -fms-extensions -Wl,--no-as-needed -DPLATFORM_IS_LINUX")
+# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11 -fms-extensions -Wl,--no-as-needed -DPLATFORM_IS_LINUX" )
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -fms-extensions -Wl,--no-as-needed -DPLATFORM_IS_LINUX")
 
-add_message_files(
-  FILES
+rosidl_generate_interfaces(
+  ${PROJECT_NAME}
   GTime.msg
   SatInfo.msg
   GPS.msg
@@ -30,28 +38,26 @@ add_message_files(
   GNSSObservation.msg
   GNSSObsVec.msg
   INL2States.msg
-)
-
-add_service_files(
-  FILES
-  FirmwareUpdate.srv
+  FirmwareUpdate.srv # Not sure if correct here
   refLLAUpdate.srv
+  DEPENDENCIES std_msgs geometry_msgs
 )
 
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-)
 
-catkin_package(
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+#   geometry_msgs
+# )
+
+ament_export_dependencies(rclcpp sensor_msgs geometry_msgs)
+ament_export_libraries(inertial_sense_ros)
+ament_package(
     INCLUDE_DIRS include
-    LIBRARIES inertial_sense_ros
-    CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs
 )
 
 include_directories(include
-  ${catkin_INCLUDE_DIRS}
+  ${ament_INCLUDE_DIRS} # check that variables starting with ament_ are correct
   lib/inertial-sense-sdk/src #This line of CMakeList.txt stays in .external file to reference submodule
 )
 
@@ -60,9 +66,9 @@ add_subdirectory(lib/inertial-sense-sdk)
 add_library(inertial_sense_ros
         src/inertial_sense_ros.cpp
 )
-target_link_libraries(inertial_sense_ros InertialSense ${catkin_LIBRARIES} pthread)
+target_link_libraries(inertial_sense_ros InertialSense ${ament_LIBRARIES} pthread)
 target_include_directories(inertial_sense_ros PUBLIC include lib/inertial-sense-sdk/src)
 add_dependencies(inertial_sense_ros inertial_sense_ros_generate_messages_cpp)
 
 add_executable(inertial_sense_node src/inertial_sense_node.cpp)
-target_link_libraries(inertial_sense_node inertial_sense_ros ${catkin_LIBRARIES})
+target_link_libraries(inertial_sense_node inertial_sense_ros ${ament_LIBRARIES})

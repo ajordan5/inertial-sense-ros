@@ -2,12 +2,9 @@
 
 int main(int argc, char**argv)
 {
-  ros::init(argc, argv, "inertial_sense_node");
-  InertialSenseROS thing;
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    thing.update();
-  }
+  rclcpp::init(argc, argv);
+  rclcpp::spin(std::make_shared<InertialSenseROS>());
+  rclcpp::shutdown();
+
   return 0;
 }
