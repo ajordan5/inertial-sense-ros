@@ -8,33 +8,31 @@
 
 #include "InertialSense.h"
 
-#include "ros/ros.h"
 #include "rclcpp/rclcpp.hpp"
-#include "ros/timer.h"
 #include "sensor_msgs/msg/imu.h"
 #include "sensor_msgs/msg/magnetic_field.h"
 #include "sensor_msgs/msg/fluid_pressure.h"
 #include "sensor_msgs/msg/joint_state.h"
-#include "inertial_sense_ros/msg/GPS.h"
-#include "inertial_sense_ros/msg/GPSInfo.h"
-#include "inertial_sense_ros/msg/PreIntIMU.h"
-#include "inertial_sense_ros/msg/FirmwareUpdate.h"
-#include "inertial_sense_ros/msg/refLLAUpdate.h"
-#include "inertial_sense_ros/msg/RTKRel.h"
-#include "inertial_sense_ros/msg/RTKInfo.h"
-#include "inertial_sense_ros/msg/GNSSEphemeris.h"
-#include "inertial_sense_ros/msg/GlonassEphemeris.h"
-#include "inertial_sense_ros/msg/GNSSObservation.h"
-#include "inertial_sense_ros/msg/GNSSObsVec.h"
-#include "inertial_sense_ros/msg/INL2States.h"
+// #include "inertial_sense_ros/msg/GPS.h"
+// #include "inertial_sense_ros/msg/GPSInfo.h"
+// #include "inertial_sense_ros/msg/PreIntIMU.h"
+// #include "inertial_sense_ros/msg/FirmwareUpdate.h"
+// #include "inertial_sense_ros/msg/refLLAUpdate.h"
+// #include "inertial_sense_ros/msg/RTKRel.h"
+// #include "inertial_sense_ros/msg/RTKInfo.h"
+// #include "inertial_sense_ros/msg/GNSSEphemeris.h"
+// #include "inertial_sense_ros/msg/GlonassEphemeris.h"
+// #include "inertial_sense_ros/msg/GNSSObservation.h"
+// #include "inertial_sense_ros/msg/GNSSObsVec.h"
+// #include "inertial_sense_ros/msg/INL2States.h"
 #include "nav_msgs/msg/odometry.h"
 #include "std_srvs/srv/trigger.h"
 #include "std_msgs/msg/header.h"
 #include "geometry_msgs/msg/vector3_stamped.h"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.h"
 #include "diagnostic_msgs/msg/diagnostic_array.h"
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2_ros/transform_broadcaster.h>
+// #include <tf2/LinearMath/Quaternion.h>
+// #include <tf2_ros/transform_broadcaster.h>
 //#include "geometry/xform.h"
 
 # define GPS_UNIX_OFFSET 315964800 // GPS time started on 6/1/1980 while UNIX time started 1/1/1970 this is the difference between those in seconds
@@ -96,15 +94,6 @@ public:
     rclcpp::Publisher pub2;
   } ros_stream_t;
 
-  std::unique_ptr<tf2_ros::TransformBroadcaster> br;
-  bool publishTf;
-  tf::Transform transform;
-  int LTCF;
-  enum
-  {
-    NED,
-    ENU
-  }ltcf;
 
   ros_stream_t IMU_;
   void IMU_callback(const dual_imu_t* const msg);
@@ -129,7 +118,7 @@ public:
   // bool set_refLLA_to_value(inertial_sense_ros::refLLAUpdate::Request &req, inertial_sense_ros::refLLAUpdate::Response &res);
   // bool perform_mag_cal_srv_callback(std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
   // bool perform_multi_mag_cal_srv_callback(std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
-  bool update_firmware_srv_callback(inertial_sense_ros::FirmwareUpdate::Request & req, inertial_sense_ros::FirmwareUpdate::Response & res);
+  // bool update_firmware_srv_callback(inertial_sense_ros::FirmwareUpdate::Request & req, inertial_sense_ros::FirmwareUpdate::Response & res);
 
   
   /**

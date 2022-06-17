@@ -15,7 +15,7 @@ InertialSenseROS::InertialSenseROS() : Node("inertial_sense")
   // refLLA_set_value_srv_ = nh_.advertiseService("set_refLLA_value", &InertialSenseROS::set_refLLA_to_value, this);
   // mag_cal_srv_ = nh_.advertiseService("single_axis_mag_cal", &InertialSenseROS::perform_mag_cal_srv_callback, this);
   // multi_mag_cal_srv_ = nh_.advertiseService("multi_axis_mag_cal", &InertialSenseROS::perform_multi_mag_cal_srv_callback, this);
-  firmware_update_srv_ = node->create_service<inertial_sense_ros::srv::FirmwareUpdate>("firmware_update", &InertialSenseROS::update_firmware_srv_callback);
+  // firmware_update_srv_ = node->create_service<inertial_sense_ros::srv::FirmwareUpdate>("firmware_update", &InertialSenseROS::update_firmware_srv_callback);
 
   configure_parameters();
   configure_data_streams();
@@ -222,19 +222,19 @@ void InertialSenseROS::reset_device()
   sleep(1);
 }
 
-bool InertialSenseROS::update_firmware_srv_callback(std::shared_ptr<inertial_sense_ros::srv::FirmwareUpdate::Request> req, std::shared_ptr<inertial_sense_ros::srv::FirmwareUpdate::Request> res)
-{
-  IS_.Close();
-  vector<InertialSense::bootloader_result_t> results = IS_.BootloadFile("*", req->filename, 921600);
-  if (!results[0].error.empty())
-  {
-    res->success = false;
-    res->message = results[0].error;
-    return false;
-  }
-  IS_.Open(port_.c_str(), baudrate_);
-  return true;
-}
+// bool InertialSenseROS::update_firmware_srv_callback(std::shared_ptr<inertial_sense_ros::srv::FirmwareUpdate::Request> req, std::shared_ptr<inertial_sense_ros::srv::FirmwareUpdate::Request> res)
+// {
+//   IS_.Close();
+//   vector<InertialSense::bootloader_result_t> results = IS_.BootloadFile("*", req->filename, 921600);
+//   if (!results[0].error.empty())
+//   {
+//     res->success = false;
+//     res->message = results[0].error;
+//     return false;
+//   }
+//   IS_.Open(port_.c_str(), baudrate_);
+//   return true;
+// }
 
 rclcpp::Time InertialSenseROS::ros_time_from_start_time(const double time)
 {
