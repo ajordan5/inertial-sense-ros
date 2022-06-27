@@ -16,7 +16,12 @@ find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rosgraph_msgs REQUIRED)
 # find_package(diagnostic_msgs REQUIRED)
-# find_package(rosidl_typesupport_cpp REQUIRED)
+find_package(rosidl_typesupport_cpp REQUIRED)
+find_package(rosidl_typesupport_introspection_cpp REQUIRED)
+find_package(rosidl_typesupport_c REQUIRED)
+find_package(rosidl_typesupport_introspection_c REQUIRED)
+find_package(rosidl_generator_cpp REQUIRED)
+find_package(rosidl_generator_c REQUIRED)
 # find_package(rosidl_default_generators REQUIRED)
 # find_package(tf2 REQUIRED)
 # find_package(tf2_ros REQUIRED)
@@ -47,7 +52,7 @@ find_package(Threads)
 
 # setup targets
 include_directories(include
-  ${ament_INCLUDE_DIRS} # check that variables starting with ament_ are correct
+  # ${ament_INCLUDE_DIRS} # check that variables starting with ament_ are correct
   lib/inertial-sense-sdk/src #This line of CMakeList.txt stays in .external file to reference submodule
 )
 
