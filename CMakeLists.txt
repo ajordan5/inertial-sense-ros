@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(inertial_sense_ros)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -70,7 +70,7 @@ target_link_libraries(inertial_sense_node inertial_sense_ros_lib) # ${ament_LIBR
 ament_target_dependencies(inertial_sense_node rclcpp rosgraph_msgs std_msgs geometry_msgs sensor_msgs)
 # add_dependencies(inertial_sense_node inertial_sense_ros_lib)
 # rosidl_target_interfaces(inertial_sense_ros_lib ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
+#rosidl_generate_interfaces(${PROJECT_NAME} ${srv_files} DEPENDENCIES sensor_msgs ) ## added by H
 # export information to downstream packages
 ament_export_dependencies(
   # rosidl_default_runtime 
@@ -102,6 +102,8 @@ install(TARGETS
   inertial_sense_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+
 
 ament_package()
 

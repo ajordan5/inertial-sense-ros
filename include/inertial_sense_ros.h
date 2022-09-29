@@ -9,10 +9,10 @@
 #include "InertialSense.h"
 
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/imu.h"
-#include "sensor_msgs/msg/magnetic_field.h"
-#include "sensor_msgs/msg/fluid_pressure.h"
-#include "sensor_msgs/msg/joint_state.h"
+#include "sensor_msgs/msg/imu.hpp"
+#include "sensor_msgs/msg/magnetic_field.hpp"
+#include "sensor_msgs/msg/fluid_pressure.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 // #include "inertial_sense_ros/msg/GPS.h"
 // #include "inertial_sense_ros/msg/GPSInfo.h"
 // #include "inertial_sense_ros/msg/PreIntIMU.h"
@@ -25,12 +25,12 @@
 // #include "inertial_sense_ros/msg/GNSSObservation.h"
 // #include "inertial_sense_ros/msg/GNSSObsVec.h"
 // #include "inertial_sense_ros/msg/INL2States.h"
-#include "nav_msgs/msg/odometry.h"
-#include "std_srvs/srv/trigger.h"
-#include "std_msgs/msg/header.h"
-#include "geometry_msgs/msg/vector3_stamped.h"
-#include "geometry_msgs/msg/pose_with_covariance_stamped.h"
-#include "diagnostic_msgs/msg/diagnostic_array.h"
+#include "nav_msgs/msg/odometry.hpp"
+#include "std_srvs/srv/trigger.hpp"
+#include "std_msgs/msg/header.hpp"
+#include "geometry_msgs/msg/vector3_stamped.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "diagnostic_msgs/msg/diagnostic_array.hpp"
 // #include <tf2/LinearMath/Quaternion.h>
 // #include <tf2_ros/transform_broadcaster.h>
 //#include "geometry/xform.h"
@@ -87,31 +87,55 @@ public:
   std::string frame_id_;
 
   // ROS Stream handling
-  typedef struct
+  // template <typename T>
+  // struct ros_stream_t
+  // {
+  //   bool enabled;
+  //   typename rclcpp::Publisher<T>::SharedPtr pub;
+  //   typename rclcpp::Publisher<T>::SharedPtr pub2;
+  // };
+
+  struct ros_stream_t_IMU
   {
     bool enabled;
-    rclcpp::Publisher pub;
-    rclcpp::Publisher pub2;
-  } ros_stream_t;
+    rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub;
+    rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub2;
+  };
+  ros_stream_t_IMU IMU_;
 
+  struct ros_stream_t_baro
+  {
+    bool enabled;
+    rclcpp::Publisher<sensor_msgs::msg::FluidPressure>::SharedPtr pub;
+    rclcpp::Publisher<sensor_msgs::msg::FluidPressure>::SharedPtr pub2;
+  };
+  ros_stream_t_baro baro_;
 
-  ros_stream_t IMU_;
+  struct ros_stream_t_diag
+  {
+    bool enabled;
+    rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub;
+    rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub2;
+  };
+  ros_stream_t_diag diagnostics_;
+
+  //ros_stream_t IMU_;
   void IMU_callback(const dual_imu_t* const msg);
 
-  ros_stream_t baro_;
+  //ros_stream_t baro_;
   void baro_callback(const barometer_t* const msg);
 
-  ros_stream_t dt_vel_;
+  //ros_stream_t dt_vel_;
   void preint_IMU_callback(const preintegrated_imu_t * const msg);
 
-  ros_stream_t diagnostics_;
-  void diagnostics_callback(const ros::TimerEvent& event);
-  rclcpp::TimerBase diagnostics_timer_;
+  //ros_stream_t diagnostics_;
+  void diagnostics_callback(); // It had parameter: const rclcpp::TimerEvent& event
+  rclcpp::timer::WallTimer diagnostics_timer_;
   float diagnostic_ar_ratio_, diagnostic_differential_age_, diagnostic_heading_base_to_rover_;
 
   // rclcpp::Service mag_cal_srv_;
   // rclcpp::Service multi_mag_cal_srv_;
-  rclcpp::Service<inertial_sense_ros::srv::FirmwareUpdate> firmware_update_srv_;
+  //rclcpp::Service<inertial_sense_ros::srv::FirmwareUpdate> firmware_update_srv_;
   // rclcpp::Service<inertial_sense_ros::srv::refLLAUpdate>  refLLA_set_current_srv_;
   // rclcpp::Service<inertial_sense_ros::srv::refLLAUpdate>  refLLA_set_value_srv_;
   // bool set_current_position_as_refLLA(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response & res);
@@ -153,10 +177,10 @@ public:
   double ecef_[3];
   sensor_msgs::msg::Imu imu1_msg, imu2_msg;
   nav_msgs::msg::Odometry odom_msg;
-  inertial_sense_ros::msg::GPS gps_msg; 
+  //inertial_sense_ros::msg::GPS gps_msg; 
   geometry_msgs::msg::Vector3Stamped gps_velEcef;
-  inertial_sense_ros::msg::GPSInfo gps_info_msg;
-  inertial_sense_ros::msg::INL2States inl2_states_msg;
+  //inertial_sense_ros::msg::GPSInfo gps_info_msg;
+  //inertial_sense_ros::msg::INL2States inl2_states_msg;
 
   // Connection to the uINS
   InertialSense IS_;

@@ -26,7 +26,7 @@ InertialSenseROS::InertialSenseROS() : Node("inertial_sense")
     start_log();//start log should always happen last, does not all stop all message streams.
   }
 
-
+  
 //  configure_ascii_output(); //does not work right now
 
   initialized_ = true;
@@ -61,7 +61,7 @@ void InertialSenseROS::configure_data_streams()
   this->get_parameter("stream_diagnostics", diagnostics_.enabled);
   if (diagnostics_.enabled)
   {
-    diagnostics_.pub = this->create_publisher<diagnostic_msgs::DiagnosticArray>("diagnostics", 1);
+    diagnostics_.pub = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", 1);
     diagnostics_timer_ = this->create_wall_timer(500ms, &InertialSenseROS::diagnostics_callback); // 2 Hz
   }
 }
@@ -196,7 +196,7 @@ void InertialSenseROS::baro_callback(const barometer_t * const msg)
 }
 
 
-void InertialSenseROS::diagnostics_callback(const ros::TimerEvent& event)
+void InertialSenseROS::diagnostics_callback()
 {
   // Create diagnostic objects
   diagnostic_msgs::msg::DiagnosticArray diag_array;
@@ -206,7 +206,7 @@ void InertialSenseROS::diagnostics_callback(const ros::TimerEvent& event)
   diagnostic_msgs::msg::DiagnosticStatus cno_mean;
   cno_mean.name = "CNO Mean";
   cno_mean.level =  diagnostic_msgs::DiagnosticStatus::OK;
-  cno_mean.message = std::to_string(gps_msg.cno);
+  //cno_mean.message = std::to_string(gps_msg.cno);
   diag_array.status.push_back(cno_mean);
 
   diagnostics_.pub->publish(diag_array);
