@@ -9,6 +9,7 @@
 #include "InertialSense.h"
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/timer.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/magnetic_field.hpp"
 #include "sensor_msgs/msg/fluid_pressure.hpp"
@@ -130,7 +131,8 @@ public:
 
   //ros_stream_t diagnostics_;
   void diagnostics_callback(); // It had parameter: const rclcpp::TimerEvent& event
-  rclcpp::timer::WallTimer diagnostics_timer_;
+  //template<typename DurationRepT , typename DurationT , typename CallbackT>
+  rclcpp::TimerBase::SharedPtr diagnostics_timer_;
   float diagnostic_ar_ratio_, diagnostic_differential_age_, diagnostic_heading_base_to_rover_;
 
   // rclcpp::Service mag_cal_srv_;
@@ -171,6 +173,13 @@ public:
 
   double tow_from_ros_time(const rclcpp::Time& rt);
   rclcpp::Time ros_time_from_gtime(const uint64_t sec, double subsec);
+
+  double GPS_towOffset_ = 0; // The offset between GPS time-of-week and local time on the uINS
+                             //  If this number is 0, then we have not yet got a fix
+  uint64_t GPS_week_ = 0; // Week number to start of GPS_towOffset_ in GPS time
+  // Time sync variables
+  double INS_local_offset_ = 0.0; // Current estimate of the uINS start time in ROS time seconds
+  bool got_first_message_ = false; // Flag to capture first uINS start time guess
 
   // Data to hold on to in between callbacks
   double lla_[3];

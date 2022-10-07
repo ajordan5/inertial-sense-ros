@@ -62,7 +62,7 @@ void InertialSenseROS::configure_data_streams()
   if (diagnostics_.enabled)
   {
     diagnostics_.pub = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", 1);
-    diagnostics_timer_ = this->create_wall_timer(500ms, &InertialSenseROS::diagnostics_callback); // 2 Hz
+    diagnostics_timer_ = this->create_wall_timer(std::chrono::milliseconds(500), std::bind(&InertialSenseROS::diagnostics_callback, this)); // 2 Hz
   }
 }
 
@@ -71,7 +71,7 @@ void InertialSenseROS::start_log()
   std::string filename = getenv("HOME");
   filename += "/Documents/Inertial_Sense/Logs/" + cISLogger::CreateCurrentTimestamp();
   RCLCPP_INFO_STREAM(this->get_logger(), "Creating log in " << filename << " folder");
-  IS_.SetLoggerEnabled(true, filename, cISLogger::LOGTYPE_DAT, RMC_PRESET_PPD_ROBOT);
+  IS_.SetLoggerEnabled(true, filename, cISLogger::LOGTYPE_DAT, RMC_PRESET_PPD_BITS);
 }
 
 void InertialSenseROS::configure_ascii_output()
@@ -146,7 +146,7 @@ template <typename T>
 void InertialSenseROS::set_flash_config(std::string param_name, uint32_t offset, T def)
 {
   T tmp;
-  this->declare_parameter<std::string>(param_name, def);
+  this->declare_parameter<T>(param_name, def);
   this->get_parameter(param_name, tmp);
   IS_.SendData(DID_FLASH_CONFIG, reinterpret_cast<uint8_t*>(&tmp), sizeof(T), offset);
 }
@@ -200,12 +200,12 @@ void InertialSenseROS::diagnostics_callback()
 {
   // Create diagnostic objects
   diagnostic_msgs::msg::DiagnosticArray diag_array;
-  diag_array.header.stamp = rclcpp::Time::now();
+  diag_array.header.stamp = this->now();
 
   // CNO mean
   diagnostic_msgs::msg::DiagnosticStatus cno_mean;
   cno_mean.name = "CNO Mean";
-  cno_mean.level =  diagnostic_msgs::DiagnosticStatus::OK;
+  cno_mean.level =  diagnostic_msgs::msg::DiagnosticStatus::OK;
   //cno_mean.message = std::to_string(gps_msg.cno);
   diag_array.status.push_back(cno_mean);
 
@@ -245,11 +245,11 @@ rclcpp::Time InertialSenseROS::ros_time_from_start_time(const double time)
   if (!got_first_message_)
   {
     got_first_message_ = true;
-    INS_local_offset_ = rclcpp::Time::now().toSec() - time;
+    INS_local_offset_ = this->now().seconds() - time;
   }
   else // low-pass filter offset to account for drift
   {
-    double y_offset = rclcpp::Time::now().toSec() - time;
+    double y_offset = this->now().seconds() - time;
     INS_local_offset_ = 0.005 * y_offset + 0.995 * INS_local_offset_;
   }
   // Publish with ROS time
