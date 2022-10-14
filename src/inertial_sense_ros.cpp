@@ -113,6 +113,23 @@ void InertialSenseROS::connect()
   }
 }
 
+void InertialSenseROS::set_navigation_dt_ms()
+{
+  // // Make sure the navigation rate is right, if it's not, then we need to change and reset it.
+  // int nav_dt_ms = IS_.GetFlashConfig().startupNavDtMs;
+  // if (nh_private_.getParam("navigation_dt_ms", nav_dt_ms))
+  // {
+  //   if (nav_dt_ms != IS_.GetFlashConfig().startupNavDtMs)
+  //   {
+  //     uint32_t data = nav_dt_ms;
+  //     IS_.SendData(DID_FLASH_CONFIG, (uint8_t*)(&data), sizeof(uint32_t), offsetof(nvm_flash_cfg_t, startupNavDtMs));
+  //     ROS_INFO("navigation rate change from %dms to %dms, resetting uINS to make change", IS_.GetFlashConfig().startupNavDtMs, nav_dt_ms);
+  //     sleep(3);
+  //     reset_device();
+  //   }
+  // }
+}
+
 void InertialSenseROS::configure_parameters()
 {
   // set_vector_flash_config<float>("INS_rpy_radians", 3, offsetof(nvm_flash_cfg_t, insRotation));
