@@ -19,15 +19,14 @@
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>rosgraph_msgs</depend>
   <!-- <depend>rosidl_default_generators</depend> -->
   <!-- <depend>tf2</depend> -->
   <depend>diagnostic_msgs</depend>
   <!-- <exec_depend>rosidl_default_runtime</exec_depend> -->
 
   <!-- <member_of_group>rosidl_interface_packages</member_of_group> -->
-
-    <export>
+  <export>
     <build_type>ament_cmake</build_type>
   </export>
-  
 </package>

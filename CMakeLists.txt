@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(inertial_sense_ros)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -26,7 +26,7 @@ find_package(rosidl_generator_c REQUIRED)
 # find_package(tf2 REQUIRED)
 # find_package(tf2_ros REQUIRED)
 
-find_package(Threads)
+find_package(Threads REQUIRED)
 
 # SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11 -fms-extensions -Wl,--no-as-needed -DPLATFORM_IS_LINUX" )
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -fms-extensions -Wl,--no-as-needed -DPLATFORM_IS_LINUX")
@@ -74,6 +74,7 @@ ament_target_dependencies(inertial_sense_node rclcpp rosgraph_msgs std_msgs geom
 # export information to downstream packages
 ament_export_dependencies(
   # rosidl_default_runtime 
+  std_msgs
   rclcpp 
   sensor_msgs 
   geometry_msgs
