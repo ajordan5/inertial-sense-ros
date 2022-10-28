@@ -8,7 +8,7 @@
 InertialSenseROS::InertialSenseROS() : Node("inertial_sense")
 {
   connect();
-  set_navigation_dt_ms();
+  // set_navigation_dt_ms();
 
   /// Start Up ROS service servers
   // refLLA_set_current_srv_ = nh_.advertiseService("set_refLLA_current", &InertialSenseROS::set_current_position_as_refLLA, this);
@@ -41,10 +41,13 @@ void InertialSenseROS::configure_data_streams()
   this->get_parameter("stream_IMU", IMU_.enabled);
 
   //std::cout << "\n\n\n\n\n\n\n\n\n\n stream_GPS: " << GPS_.enabled << "\n\n\n\n\n\n\n\n\n\n\n";
+  RCLCPP_INFO(this->get_logger(), "Setting up IMU");
   if (IMU_.enabled)
   {
     IMU_.pub = this->create_publisher<sensor_msgs::msg::Imu>("imu", 1);
     SET_CALLBACK(DID_DUAL_IMU, dual_imu_t, IMU_callback, 1);
+    RCLCPP_INFO(this->get_logger(), "IMU setup");
+
   }
 
   // Set up the barometer ROS stream
@@ -142,6 +145,7 @@ void InertialSenseROS::configure_parameters()
   // set_flash_config<float>("declination", offsetof(nvm_flash_cfg_t, magDeclination), 0.0f);
   // set_flash_config<int>("dynamic_model", offsetof(nvm_flash_cfg_t, insDynModel), 8);
   set_flash_config<int>("ser1_baud_rate", offsetof(nvm_flash_cfg_t, ser1BaudRate), 921600);
+  RCLCPP_INFO(this->get_logger(), "Baudrate set");
 }
 
 // template <typename T>

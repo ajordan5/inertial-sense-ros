@@ -5,7 +5,7 @@
                            baud: 921600,
                            navigation_dt_ms: 10,
                            stream_INS: true,
-                           stream_IMU: false,
+                           stream_IMU: true,
                            stream_GPS: false,
                            stream_GPS_info: false,
                            stream_baro: false,
