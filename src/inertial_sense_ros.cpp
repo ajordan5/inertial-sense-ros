@@ -99,8 +99,8 @@ void InertialSenseROS::connect()
   this->get_parameter("port", port_);
   this->declare_parameter<std::string>("frame_id", "body");
   this->get_parameter("frame_id", frame_id_);
-  this->declare_parameter<int>("baudrate", 921600);
-  this->get_parameter("baudrate", baudrate_);
+  this->declare_parameter<int>("baud", 921600);
+  this->get_parameter("baud", baudrate_);
   
   /// Connect to the uINS
   RCLCPP_INFO(this->get_logger(), "Connecting to serial port \"%s\", at %d baud", port_.c_str(), baudrate_);

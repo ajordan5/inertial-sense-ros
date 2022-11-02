@@ -1,0 +1,25 @@
+<launch>
+	<node pkg="inertial_sense_ros" exec="inertial_sense_node" name="inertial_sense_node"  output="screen">
+    <param name="port" value="/dev/ttyUSB0"/>
+    <param name="baud" value="92100"/>
+    <param name="navigation_dt_ms" value="10"/>
+    <param name="stream_INS" value="true"/>
+    <param name="stream_IMU" value="true"/>
+    <param name="stream_GPS" value="false"/>
+    <param name="stream_GPS_info" value="false"/>
+    <param name="stream_baro" value="false"/>
+    <param name="stream_mag" value="false"/>
+    <param name="stream_preint_IMU" value="false"/>
+    <param name="inclination" value="1.14878541071"/>
+    <param name="declination" value="0.20007290992"/>
+    <param name="dynamic_model" value="8"/>
+    <param name="INS_rpy" value="1.5708, 0.0, 0.0" value-sep=","/>
+    <param name="INS_xyz" value="1, 0, 0" value-sep=","/>
+    <param name="GPS_ant_xyz" value="1, 1, 1" value-sep=","/>
+    <param name="GPS_ref_lla" value="0.25, -111.67, 1556.59" value-sep=","/>
+    <param name="serial1_baud_rate:" value="115200"/>
+    <param name="NMEA_rate" value="200"/>
+    <param name="NMEA_configuration" value="0x0F"/>
+    <param name="NMEA_ports" value="0x02"/>
+  </node>
+</launch>
