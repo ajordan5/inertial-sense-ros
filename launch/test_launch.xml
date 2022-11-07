@@ -1,7 +1,7 @@
 <launch>
 	<node pkg="inertial_sense_ros" exec="inertial_sense_node" name="inertial_sense_node"  output="screen">
     <param name="port" value="/dev/ttyUSB0"/>
-    <param name="baud" value="92100"/>
+    <param name="baud" value="921600"/>
     <param name="navigation_dt_ms" value="10"/>
     <param name="stream_INS" value="true"/>
     <param name="stream_IMU" value="true"/>
