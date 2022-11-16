@@ -37,7 +37,7 @@ void InertialSenseROS::configure_data_streams()
 {
   
   // Set up the IMU ROS stream
-  this->declare_parameter<bool>("stream_IMU", false);
+  this->declare_parameter<bool>("stream_IMU", true);
   this->get_parameter("stream_IMU", IMU_.enabled);
 
   //std::cout << "\n\n\n\n\n\n\n\n\n\n stream_GPS: " << GPS_.enabled << "\n\n\n\n\n\n\n\n\n\n\n";
